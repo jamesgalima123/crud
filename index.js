@@ -3,6 +3,7 @@ const app = express();
 const mysql = require('mysql');
 const cors = require('cors');
 const { json, response } = require('express');
+const e = require('express');
 
 
 
@@ -21,28 +22,45 @@ app.listen(3001,()=>{
 });
 app.get('/read',(request,response)=>{
     con.query("select* from `users`",(err,rows)=>{
-        let usersArray = JSON.stringify(rows);
-        response.status(200).json({users:usersArray});
+        if(!error){
+            let usersArray = JSON.stringify(rows);
+            response.status(200).json({users:usersArray});
+            console("SQL Read Query error " + error);
+        }else{
+
+        }
        
     }); 
 
 });
 app.post('/delete',(request,response)=>{
     const name = request.body.name;
-    con.query("DELETE from `users` WHERE `name` = '"+ name +"'");
+    try {
+        con.query("DELETE from `users` WHERE `name` = '"+ name +"'");
+    } catch (error) {
+        console("SQL Delete Query error " + error);
+    }
  
 });
 app.post('/edit',(request,response)=>{
     const name = request.body.name;
     const email = request.body.email;
-    con.query("UPDATE `users` SET `email`='" + email +"' WHERE `name` = '" + name + "'");
+    try {
+        con.query("UPDATE `users` SET `email`='" + email +"' WHERE `name` = '" + name + "'");
+    } catch (error) {
+        console("SQL Edit Query error " + error);
+    }
 });
 app.post('/create',(request,response) =>{
     let name = request.body.name;
     let email = request.body.email;
     let temp_pass = randomstring(5);
     console.log(name);
-    const query = "insert into `users`(`name`,`password`,`email`) values('" + name + "','"+ temp_pass +"','"+ email +"' );"
+    try {
+        const query = "insert into `users`(`name`,`password`,`email`) values('" + name + "','"+ temp_pass +"','"+ email +"' );"
+    } catch (error) {
+        console("SQL Create Query error " + error);
+    }
     con.query(query,(err)=>{
         if(err){
             console.log(err);
