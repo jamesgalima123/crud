@@ -56,29 +56,18 @@ app.post('/create',(request,response) =>{
     console.log(name);
     try {
         const query = "insert into `users`(`name`,`password`,`email`) values('" + name + "','"+ temp_pass +"','"+ email +"' );"
+        con.query(query,(err)=>{
+            if(err){
+                console.log(err);
+            }else{
+                console.log("account created");
+                
+            }
+        });
     } catch (error) {
         console("SQL Create Query error " + error);
     }
-    con.query(query,(err)=>{
-        if(err){
-            console.log(err);
-        }else{
-            console.log("account created");
-            const mailOptions = {
-                from:'cjaygalima@gmail.com',
-                to:email,
-                subject:'hi',
-                text:'your temporary password is ' + temp_pass
-            };
-            transporter.sendMail(mailOptions,(error,info)=>{
-                if(error){
-                    console.log("email send error " + error);
-                }else{
-                    console.log("email sent " + info.response);
-                }
-            });
-        }
-    });
+    
     response.send("henlow");
 });
 con.connect((err) =>{
