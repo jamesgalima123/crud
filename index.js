@@ -21,12 +21,11 @@ app.listen(3001,()=>{
 });
 app.get('/read',(request,response)=>{
     con.query("select* from `users`",(err,rows)=>{
-        if(!error){
+        if(!err){
             let usersArray = JSON.stringify(rows);
             response.status(200).json({users:usersArray});
-            console("SQL Read Query error " + error);
         }else{
-
+            console.log("SQL Read Query error " + err);
         }
        
     }); 
@@ -41,7 +40,7 @@ app.post('/delete',(request,response)=>{
     }
  
 });
-app.post('/edit',(request,response)=>{
+app.post('/update',(request,response)=>{
     const name = request.body.name;
     const email = request.body.email;
     try {
