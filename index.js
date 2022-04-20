@@ -8,7 +8,6 @@ const e = require('express');
 
 
 
-
 const con = mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -54,7 +53,7 @@ app.post('/edit',(request,response)=>{
 app.post('/create',(request,response) =>{
     let name = request.body.name;
     let email = request.body.email;
-    let temp_pass = randomstring(5);
+    temp_pass = randomstring(5);
     console.log(name);
     try {
         const query = "insert into `users`(`name`,`password`,`email`) values('" + name + "','"+ temp_pass +"','"+ email +"' );"
@@ -90,7 +89,16 @@ con.connect((err) =>{
         console.log("connected to mysql");
     }
 });
-
+function randomstring(length) {
+    var result           = '';
+    var characters       = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+      result += characters.charAt(Math.floor(Math.random() * 
+ charactersLength));
+   }
+   return result;
+}
 /*const query = "CREATE TABLE users(id int(11)NOT NULL AUTO_INCREMENT primary key,name varchar(50),password varchar(50));";
 con.query(query);*/
 
