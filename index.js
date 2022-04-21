@@ -27,20 +27,29 @@ app.listen(3001,()=>{
 app.post('/login',(req,res)=>{
     const email = req.body.email;
     const password = req.body.password;
-    const user = {name : email};
-    const accessToken =  jwt.sign(user,process.env.ACCESS_TOKEN_SECRET);
-    con.query("select* from `users` where `email` = '" + email +"' and `password` = '" + password +"'",(err,rows) =>{
-        console.log("row " + rows.length);
-        if(err){
-            console.log("error " + err);
-        }else{
-            if(rows.length > 0){
-                res.json({accessToken : accessToken,login:"success"});
-            }else{
-                res.send({login:"log in failed"});
-            }
+    if(typeof email !== 'undefined' && typeof password !== 'undefined'){
+        if(email.length > 0 && password.length > 0){
+            const user = {name : email};
+            const accessToken =  jwt.sign(user,process.env.ACCESS_TOKEN_SECRET);
+            con.query("select* from `users` where `email`='" + email +"' and `password`='" + password +"'",(err,rows) =>{
+                console.log("row " + email + " " + password + " " + rows.length);
+                if(err){
+                    console.log("error " + err);
+                }else{
+                    if(rows.length > 0){
+                        console.log("log in success");
+                        res.json({accessToken : accessToken,login:"success"});
+                    }else{
+                        console.log("log in failed");
+                        res.json({login:"log in failed"});
+    
+                    }
+                }
+            });
         }
-    });
+    }else{
+        res.send("missing values");
+    }
 });  
 app.get('/read',(request,response)=>{
     con.query("select* from `users`",(err,rows)=>{
