@@ -29,16 +29,15 @@ app.post('/login',(req,res)=>{
     const password = req.body.password;
     const user = {name : email};
     const accessToken =  jwt.sign(user,process.env.ACCESS_TOKEN_SECRET);
-    res.json({accessToken : accessToken});
     con.query("select* from `users` where `email` = '" + email +"' and `password` = '" + password +"'",(err,rows) =>{
         console.log("row " + rows.length);
         if(err){
             console.log("error " + err);
         }else{
             if(rows.length > 0){
-                console.log("log in success");
+                res.json({accessToken : accessToken,login:"success"});
             }else{
-                console.log("log in failed");
+                res.send({login:"log in failed"});
             }
         }
     });
@@ -49,7 +48,7 @@ app.get('/read',(request,response)=>{
             let usersArray = JSON.stringify(rows);
             response.status(200).json({users:usersArray});
         }else{
-            console.log("SQL Read Query error " + err);
+            res.send("SQL Read Query error " + err);
         }
        
     }); 
@@ -78,7 +77,7 @@ app.post('/create',(request,response) =>{
     let email = request.body.email;
     let pass = request.body.email;
     try {
-        const query = "insert into `users`(`name`,`password`,`email`) values('" + name + "','"+ temp_pass +"','"+ email +"' );"
+        const query = "insert into `users`(`name`,`password`,`email`) values('" + name + "','"+ pass +"','"+ email +"' );"
         con.query(query,(err)=>{
             if(err){
                 console.log(err);
@@ -91,7 +90,7 @@ app.post('/create',(request,response) =>{
         console("SQL Create Query error " + error);
     }
     
-    response.send("henlow");
+    response.send("account created");
 });
 con.connect((err) =>{
     if(err){

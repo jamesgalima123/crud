@@ -3,7 +3,8 @@ Content-Type: application/json
 
 {
     "name":"wqdwqdwqd",
-    "email":"qwedqwds@gmail.com"
+    "email":"123@gmail.com",
+    "password":"123123"
 }
 ###
 POST http://localhost:3001/login
