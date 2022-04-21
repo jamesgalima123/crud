@@ -84,7 +84,7 @@ app.post('/update',(request,response)=>{
 app.post('/create',(request,response) =>{
     let name = request.body.name;
     let email = request.body.email;
-    let pass = request.body.email;
+    let pass = request.body.password;
     try {
         const query = "insert into `users`(`name`,`password`,`email`) values('" + name + "','"+ pass +"','"+ email +"' );"
         con.query(query,(err)=>{
