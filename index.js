@@ -4,7 +4,12 @@ const mysql = require('mysql');
 const cors = require('cors');
 const { json, response } = require('express');
 const e = require('express');
-
+const cc =require('dotenv');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+console.log(crypto.randomBytes(64).toString('hex'));
+require("dotenv").config();
+console.log(process.env.HENLO);
 
 
 
@@ -19,6 +24,25 @@ app.use(express.json());
 app.listen(3001,()=>{
     console.log("connect");
 });
+app.post('/login',(req,res)=>{
+    const email = req.body.email;
+    const password = req.body.password;
+    const user = {name : email};
+    const accessToken =  jwt.sign(user,process.env.ACCESS_TOKEN_SECRET);
+    res.json({accessToken : accessToken});
+    con.query("select* from `users` where `email` = '" + email +"' and `password` = '" + password +"'",(err,rows) =>{
+        console.log("row " + rows.length);
+        if(err){
+            console.log("error " + err);
+        }else{
+            if(rows.length > 0){
+                console.log("log in success");
+            }else{
+                console.log("log in failed");
+            }
+        }
+    });
+});  
 app.get('/read',(request,response)=>{
     con.query("select* from `users`",(err,rows)=>{
         if(!err){
@@ -52,8 +76,7 @@ app.post('/update',(request,response)=>{
 app.post('/create',(request,response) =>{
     let name = request.body.name;
     let email = request.body.email;
-    temp_pass = randomstring(5);
-    console.log(name);
+    let pass = request.body.email;
     try {
         const query = "insert into `users`(`name`,`password`,`email`) values('" + name + "','"+ temp_pass +"','"+ email +"' );"
         con.query(query,(err)=>{
@@ -87,6 +110,16 @@ function randomstring(length) {
    }
    return result;
 }
+/*function authenticateUser(req,res,next){
+    const authHeader = req.headers('authorization');
+    const token = authHeader && authHeader.split(' ')[1];
+    if(token == null) return res.sendStatus(401);
+    jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,user)=>{
+        if(err) return res.sendStatus(403);
+        req.user = user;
+        next();
+    });
+}*/
 /*const query = "CREATE TABLE users(id int(11)NOT NULL AUTO_INCREMENT primary key,name varchar(50),password varchar(50));";
 con.query(query);*/
 
