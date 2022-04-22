@@ -1,8 +1,9 @@
 const express = require('express');
 const app = express();
 const mysql = require('mysql');
+//const opencv = require('opencv4nodejs');
 const cors = require('cors');
-const { json, response } = require('express');
+const { json, res } = require('express');
 const e = require('express');
 const cc =require('dotenv');
 const jwt = require('jsonwebtoken');
@@ -24,7 +25,7 @@ app.use(express.json());
 app.listen(3001,()=>{
     console.log("connect");
 });
-app.post('/login',(req,res)=>{
+app.get('/api/v1/login',(req,res)=>{
     const email = req.body.email;
     const password = req.body.password;
     if(typeof email !== 'undefined' && typeof password !== 'undefined'){
@@ -51,11 +52,12 @@ app.post('/login',(req,res)=>{
         res.send("missing values");
     }
 });  
-app.get('/read',(request,response)=>{
-    con.query("select* from `users`",(err,rows)=>{
+app.get('/api/v1/read',(req,res)=>{
+    const email = req.body.email;
+    con.query("select `name` from `users` where `email` = '" + email +"'",(err,rows)=>{
         if(!err){
             let usersArray = JSON.stringify(rows);
-            response.status(200).json({users:usersArray});
+            res.status(200).json({users:usersArray});
         }else{
             res.send("SQL Read Query error " + err);
         }
@@ -63,28 +65,63 @@ app.get('/read',(request,response)=>{
     }); 
 
 });
-app.post('/delete',(request,response)=>{
-    const name = request.body.name;
+app.put('/api/v1/changepassword',(req,res)=>{
+    const password = req.body.password;
+    const email = req.body.email;
     try {
-        con.query("DELETE from `users` WHERE `name` = '"+ name +"'");
+        con.query("UPDATE `users` SET `password`='" + password +"' WHERE `name` = '" + email + "'",(err,result,field)=>{
+            
+        });
+        res.send("password successfully changed");
     } catch (error) {
-        console("SQL Delete Query error " + error);
+        console("SQL Edit Query error " + error);
+        res.send("SQL Edit Query error " + error);
+
+    }
+});
+app.delete('/api/v1/delete',(req,res)=>{
+    const name = req.body.name;
+    try {
+        con.query("DELETE from `users` WHERE `name` = '"+ name +"'",(error,result,field)=>{
+            const affectedRows = result.affectedRows;
+            if(affectedRows == 1){
+                res.send("Account successfully deleted");
+            }else{
+                res.send("No matching email");
+            }
+        });
+    } catch (error) {
+        console.log("SQL Delete Query error " + error);
+        res.send("SQL Delete Query error " + error);
+
     }
  
 });
-app.post('/update',(request,response)=>{
-    const name = request.body.name;
-    const email = request.body.email;
+app.put('/api/v1/update',(req,res)=>{
+    const name = req.body.name;
+    const email = req.body.email;
     try {
-        con.query("UPDATE `users` SET `email`='" + email +"' WHERE `name` = '" + name + "'");
+        con.query("UPDATE `users` SET `name`='" + name +"' WHERE `email` = '" + email + "'",(error,result,field)=>{
+            const affectedRows = result.affectedRows;
+            if(affectedRows == 1){
+                res.send("Name successfully updated");
+            }else{
+                res.send("No matching email");
+            }
+            
+            
+ 
+        });
+        
     } catch (error) {
         console("SQL Edit Query error " + error);
+        res.send("SQL Edit Query error " + error);
     }
 });
-app.post('/create',(request,response) =>{
-    let name = request.body.name;
-    let email = request.body.email;
-    let pass = request.body.password;
+app.post('/api/v1/create',(req,res) =>{
+    let name = req.body.name;
+    let email = req.body.email;
+    let pass = req.body.password;
     try {
         const query = "insert into `users`(`name`,`password`,`email`) values('" + name + "','"+ pass +"','"+ email +"' );"
         con.query(query,(err)=>{
@@ -99,7 +136,7 @@ app.post('/create',(request,response) =>{
         console("SQL Create Query error " + error);
     }
     
-    response.send("account created");
+    res.send("account created");
 });
 con.connect((err) =>{
     if(err){
