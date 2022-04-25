@@ -8,10 +8,10 @@ const e = require('express');
 const cc =require('dotenv');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const validator = require('validatorjs');
 console.log(crypto.randomBytes(64).toString('hex'));
 require("dotenv").config();
 console.log(process.env.HENLO);
-
 
 
 const con = mysql.createConnection({
@@ -30,7 +30,7 @@ app.get('/api/v1/login',(req,res)=>{
     const password = req.body.password;
     if(typeof email !== 'undefined' && typeof password !== 'undefined'){
         if(email.length > 0 && password.length > 0){
-            const user = {name : email};
+            const user = {email : email};
             const accessToken =  jwt.sign(user,process.env.ACCESS_TOKEN_SECRET);
             con.query("select* from `users` where `email`='" + email +"' and `password`='" + password +"'",(err,rows) =>{
                 console.log("row " + email + " " + password + " " + rows.length);
@@ -119,22 +119,37 @@ app.put('/api/v1/update',(req,res)=>{
     }
 });
 app.post('/api/v1/create',(req,res) =>{
+    console.log(req.body.name);
+    const validationRule = {
+            "name" :"required:string",
+            "email" : "required:email",
+            "password": "required:string"
+    };
+    
+    let body = req.body;
+
+    let validation = new validator(body,validationRule);
+
+    if (validation.fails()) {
+        return res.json(validation.errors, validationRule, false)
+    }
+
     let name = req.body.name;
     let email = req.body.email;
     let pass = req.body.password;
-    try {
-        const query = "insert into `users`(`name`,`password`,`email`) values('" + name + "','"+ pass +"','"+ email +"' );"
-        con.query(query,(err)=>{
-            if(err){
-                console.log(err);
-            }else{
-                console.log("account created");
+    // try {
+    //     const query = "insert into `users`(`name`,`password`,`email`) values('" + name + "','"+ pass +"','"+ email +"' );"
+    //     con.query(query,(err)=>{
+    //         if(err){
+    //             console.log(err);
+    //         }else{
+    //             console.log("account created");
                 
-            }
-        });
-    } catch (error) {
-        console("SQL Create Query error " + error);
-    }
+    //         }
+    //     });
+    // } catch (error) {
+    //     console("SQL Create Query error " + error);
+    // }
     
     res.send("account created");
 });
